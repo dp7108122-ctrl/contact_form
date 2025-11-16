@@ -1,64 +1,120 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Contact Us</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
   <style>
-    body{font-family:Arial,Helvetica,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;background:#f6f8fa}
-    .card{background:white;padding:24px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.08);width:320px}
-    input,textarea{width:100%;padding:10px;margin:8px 0;border:1px solid #ddd;border-radius:6px}
-    button{width:100%;padding:10px;border:0;border-radius:6px;background:#2563eb;color:white;font-weight:600;cursor:pointer}
-    .msg{margin-top:12px;font-size:14px}
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .form-box {
+      background: #fff;
+      padding: 30px;
+      width: 380px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #0066ff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #004ecb;
+    }
+
+    .message {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 14px;
+      color: green;
+      display: none;
+    }
+
+    .error {
+      color: red;
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h3>Contact Us</h3>
+
+  <div class="form-box">
+    <h2>Contact Us</h2>
     <form id="contactForm">
-      <input type="text" name="name" id="name" placeholder="Your name" required />
-      <input type="email" name="email" id="email" placeholder="Your email" required />
-      <textarea name="description" id="description" placeholder="Write your message" rows="5" required></textarea>
-      <button type="submit">Send</button>
-      <div class="msg" id="msg"></div>
+      <input type="text" id="name" name="name" placeholder="Your Name" required />
+      <input type="email" id="email" name="email" placeholder="Your Email" required />
+      <textarea id="message" name="message" rows="4" placeholder="Your Message" required></textarea>
+      <button type="submit">Send Message</button>
     </form>
+    <p class="message" id="responseMessage"></p>
   </div>
 
   <script>
-    const form = document.getElementById('contactForm');
-    const msg = document.getElementById('msg');
+    const scriptURL = "https://script.google.com/macros/s/AKfycbyuGswZlyn8TDLIurmrwbTQ5y9mxAKf1hfBlXvA3gYwWSMIaqXoXiQTW1Bd0-pZN3JC/exec";
 
-    // Replace with your Apps Script web app URL:
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyuGswZlyn8TDLIurmrwbTQ5y9mxAKf1hfBlXvA3gYwWSMIaqXoXiQTW1Bd0-pZN3JC/exec";
-
-    form.addEventListener('submit', async (e) => {
+    document.getElementById("contactForm").addEventListener("submit", function(e) {
       e.preventDefault();
-      msg.textContent = "Sending…";
 
-      const payload = {
-        name: document.getElementById('name').value.trim(),
-        email: document.getElementById('email').value.trim(),
-        description: document.getElementById('description').value.trim()
-      };
+      const form = e.target;
+      const data = new FormData(form);
 
-      try {
-        const res = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (data.status === 'success') {
-          msg.textContent = "Thanks! Your message has been sent -- check your email for confirmation.";
-          form.reset();
-        } else {
-          msg.textContent = "Sorry, something went wrong: " + (data.message || "Please try later.");
-        }
-      } catch (err) {
-        msg.textContent = "Network error: " + err.message;
-      }
+      fetch(scriptURL, {
+        method: "POST",
+        body: data
+      })
+      .then(response => response.text())
+      .then(result => {
+        document.getElementById("responseMessage").innerText = "Message sent successfully!";
+        document.getElementById("responseMessage").style.display = "block";
+        document.getElementById("responseMessage").classList.remove("error");
+        form.reset();
+      })
+      .catch(error => {
+        document.getElementById("responseMessage").innerText = "Error sending message. Please try again.";
+        document.getElementById("responseMessage").style.display = "block";
+        document.getElementById("responseMessage").classList.add("error");
+      });
     });
   </script>
+
 </body>
 </html>
-
